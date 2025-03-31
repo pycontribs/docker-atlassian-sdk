@@ -1,0 +1,34 @@
+name: build
+on:
+  schedule:
+    - cron: 0 0 * * 1  # Build latest image every Monday
+
+  push:
+    branches:
+      - main
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+  # Run tests for any PRs.
+  pull_request:
+
+  # Manual dispatch
+  workflow_dispatch:
+
+jobs:
+  build:
+    # environment: release # approval
+    runs-on: ubuntu-24.04
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'release' && github.event.action == 'published')
+    # This condition ensures that publishing can only happen on push events to the main branch.
+    # Pull request events are excluded as they don't have the necessary permissions to publish.
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: pull-merge-push for the the two arch images under a single manifest
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: ./tools/build.sh --publish "${{ github.event.release.tag_name || github.sha }}" "${{ (github.event_name == 'release' && github.event.action == 'published') || '--dry' }}"
