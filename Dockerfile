@@ -1,4 +1,4 @@
-FROM redhat/ubi8
+FROM redhat/ubi9
 
 # Set default SDK version
 ARG ATLASSIAN_SDK_VERSION=9.1.1
